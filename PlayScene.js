@@ -69,7 +69,7 @@ class PlayScene extends Phaser.Scene
         });
 
         // asteroids
-        this.asteroids = [];
+        this.asteroids = this.physics.add.group();
         for (var i = 0; i < 7; i++) {
             var asteroid = this.add.sprite(
                 Phaser.Math.Between(100, config.width - 100),
@@ -82,7 +82,7 @@ class PlayScene extends Phaser.Scene
             asteroid.setScale(Phaser.Math.Between(1, 1.5));
             this.startAngleBounce(asteroid);
 
-            this.asteroids[i] = asteroid;
+            this.asteroids.add(asteroid);
         }
 
         // power ups
@@ -152,8 +152,8 @@ class PlayScene extends Phaser.Scene
         this.background.tilePositionY -= 0.5
 
         // move asteroids
-        for (var i in this.asteroids) {
-            this.moveAsteroid(this.asteroids[i], 1);
+        for (var i in this.asteroids.getChildren()) {
+            this.moveAsteroid(this.asteroids.getChildren()[i], 1);
         }
 
         // player moves
