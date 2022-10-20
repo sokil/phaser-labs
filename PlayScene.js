@@ -5,7 +5,11 @@ class PlayScene extends Phaser.Scene {
 
     preload() {
         this.load.image("background", "assets/bg_tile.jpg");
-        this.load.image("asteroid", "assets/asteroid.png");
+
+        this.load.spritesheet("asteroid", "assets/asteroid.png", {
+            frameWidth: 35,
+            frameHeight: 30,
+        });
 
         this.load.spritesheet("spaceship", "assets/spritesheet/spaceship.png", {
             frameWidth: 81,
@@ -111,5 +115,6 @@ class PlayScene extends Phaser.Scene {
         asteroid.x = Phaser.Math.Between(0, config.width);
         asteroid.y = -50;
         asteroid.setTexture("asteroid");
+        asteroid.setVisible();
     }
 }
