@@ -16,9 +16,8 @@ class Beam extends Phaser.GameObjects.Sprite
     scene.projectiles.add(this);
   }
 
-
   update() {
-    if(this.y < 32) {
+    if(this.y < 120) {
       this.destroy();
     }
   }

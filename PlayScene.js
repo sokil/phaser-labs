@@ -70,7 +70,7 @@ class PlayScene extends Phaser.Scene
 
         // asteroids
         this.asteroids = [];
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 7; i++) {
             this.asteroids[i] = this.add.sprite(
                 Phaser.Math.Between(100, config.width - 100),
                 Phaser.Math.Between(-600, -10),
@@ -109,6 +109,29 @@ class PlayScene extends Phaser.Scene
             powerUp.play("red_powerup_anim")
         }
 
+        // projectiles
+        this.projectiles = this.add.group();
+
+        // destroy power ups by beam
+        this.physics.add.collider(
+            this.projectiles,
+            this.powerUps,
+            function (projectile, powerUp) {
+                projectile.destroy();
+                powerUp.destroy();
+            }
+        );
+
+        // pickup power ups by user
+        this.pickedPowerUps = [];
+        this.physics.add.overlap(
+            this.player,
+            this.powerUps,
+            this.pickPowerUp,
+            null,
+            this
+        );
+
         // handle explosion on interactive objects
         this.input.on('gameobjectdown', this.destroyAsteroid, this);
 
@@ -117,9 +140,6 @@ class PlayScene extends Phaser.Scene
 
         // shoot
         this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
-        // projectiles
-        this.projectiles = this.add.group();
 
         // score
         this.add.text(20, 20, "Score: 0", {fill: "red"});
@@ -143,10 +163,14 @@ class PlayScene extends Phaser.Scene
         }
 
         // update beams
-        for(var i = 0; i < this.projectiles.getChildren().length; i++){
+        for(var i = 0; i < this.projectiles.getChildren().length; i++) {
             var beam = this.projectiles.getChildren()[i];
             beam.update();
         }
+    }
+
+    pickPowerUp(player, powerUp) {
+        powerUp.disableBody(true, true);
     }
 
     shootBeam() {
