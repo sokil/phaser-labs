@@ -44,6 +44,8 @@ class PlayScene extends Phaser.Scene {
     update() {
         this.moveAsteroid(this.asteroid1, 1);
         this.moveAsteroid(this.asteroid2, 2);
+
+        this.background.tilePositionY -= 0.5
     }
 
     startScaleBounce(object) {
