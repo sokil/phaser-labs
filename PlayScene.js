@@ -43,7 +43,8 @@ class PlayScene extends Phaser.Scene {
             repeat: -1
         });
         this.player.play("spaceship_anim");
-        this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.player.setCollideWorldBounds(true);
+
 
         // explosion
         this.anims.create({
@@ -97,6 +98,9 @@ class PlayScene extends Phaser.Scene {
 
         // handle explosion on interactive objects
         this.input.on('gameobjectdown', this.destroyAsteroid, this);
+
+        // handle keyboard
+        this.cursorKeys = this.input.keyboard.createCursorKeys();
 
         // score
         this.add.text(20, 20, "Score: 0", {fill: "red"});
@@ -162,9 +166,15 @@ class PlayScene extends Phaser.Scene {
 
     movePlayer() {
         if (this.cursorKeys.left.isDown) {
-            this.player.setVelocityX(-150);
+            this.player.setVelocityX(-200);
         } else if (this.cursorKeys.right.isDown) {
-            this.player.setVelocityX(150);
+            this.player.setVelocityX(200);
+        }
+
+        if (this.cursorKeys.up.isDown) {
+            this.player.setVelocityY(-200);
+        } else if (this.cursorKeys.down.isDown) {
+            this.player.setVelocityY(200);
         }
     }
 }
