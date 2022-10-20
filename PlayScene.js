@@ -82,6 +82,12 @@ class PlayScene extends Phaser.Scene
             asteroid.setScale(Phaser.Math.Between(1, 1.5));
             this.startAngleBounce(asteroid);
 
+            asteroid.on('animationcomplete', (animation, frame, asteroid, frameKey) => {
+                if (animation.key === "explosion_anim") {
+                    this.resetAsteroid(asteroid);
+                }
+            });
+
             this.asteroids.add(asteroid);
         }
 
@@ -114,7 +120,7 @@ class PlayScene extends Phaser.Scene
         // projectiles
         this.projectiles = this.add.group();
 
-        // destroy power ups by beam
+        // destroy power ups by projectile
         this.physics.add.collider(
             this.projectiles,
             this.powerUps,
@@ -125,7 +131,6 @@ class PlayScene extends Phaser.Scene
         );
 
         // pickup power ups by user
-        this.pickedPowerUps = [];
         this.physics.add.overlap(
             this.player,
             this.powerUps,
@@ -134,8 +139,26 @@ class PlayScene extends Phaser.Scene
             this
         );
 
+        // destroy ship by asteroid
+        this.physics.add.overlap(
+            this.player,
+            this.asteroids,
+            this.destroyPlayer,
+            null,
+            this
+        );
+
+        // destroy asteroids by beam
+        this.physics.add.overlap(
+            this.projectiles,
+            this.asteroids,
+            this.destroyAsteroidByProjectile,
+            null,
+            this
+        );
+
         // handle explosion on interactive objects
-        this.input.on('gameobjectdown', this.destroyAsteroid, this);
+        this.input.on('gameobjectdown', this.destroyAsteroidByMouseClick, this);
 
         // handle keyboard
         this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -179,6 +202,13 @@ class PlayScene extends Phaser.Scene
         var beam = new Beam(this);
     }
 
+    destroyPlayer(player, asteroid) {
+        this.resetAsteroid(asteroid)
+        player.x = config.width/2;
+        player.y = config.height - 60;
+        player.setVelocity(0, 0)
+    }
+
     startScaleBounce(object) {
         var scaleStep = 0.01;
         setInterval(() => {
@@ -205,9 +235,18 @@ class PlayScene extends Phaser.Scene
         }, 100);
     }
 
-    destroyAsteroid(pointer, gameObject) {
-        gameObject.setTexture("explosion");
-        gameObject.play("explosion_anim");
+    destroyAsteroidByMouseClick(pointer, asteroid) {
+        this.animateDestroyAsteroid(asteroid)
+    }
+
+    destroyAsteroidByProjectile(projectile, asteroid) {
+        projectile.destroy()
+        this.animateDestroyAsteroid(asteroid)
+    }
+
+    animateDestroyAsteroid(asteroid) {
+        asteroid.setTexture("explosion");
+        asteroid.play("explosion_anim");
     }
 
     moveAsteroid(asteroid, velocity) {
