@@ -1,4 +1,5 @@
-class PlayScene extends Phaser.Scene {
+class PlayScene extends Phaser.Scene
+{
     constructor() {
         super("play");
     }
@@ -25,6 +26,11 @@ class PlayScene extends Phaser.Scene {
             frameWidth: 16,
             frameHeight: 16,
         });
+
+        this.load.spritesheet("beam", "assets/spritesheet/beam.png",{
+            frameWidth: 16,
+            frameHeight: 16
+        });
     }
 
     create() {
@@ -45,8 +51,15 @@ class PlayScene extends Phaser.Scene {
         this.player.play("spaceship_anim");
         this.player.setCollideWorldBounds(true);
 
+        // beam
+        this.anims.create({
+            key: "beam_anim",
+            frames: this.anims.generateFrameNumbers("beam"),
+            frameRate: 20,
+            repeat: -1
+        });
 
-        // explosion
+        // asteroid explosion
         this.anims.create({
             key: "explosion_anim",
             frames: this.anims.generateFrameNumbers("explosion"),
@@ -102,6 +115,12 @@ class PlayScene extends Phaser.Scene {
         // handle keyboard
         this.cursorKeys = this.input.keyboard.createCursorKeys();
 
+        // shoot
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+        // projectiles
+        this.projectiles = this.add.group();
+
         // score
         this.add.text(20, 20, "Score: 0", {fill: "red"});
     }
@@ -117,6 +136,21 @@ class PlayScene extends Phaser.Scene {
 
         // player moves
         this.movePlayer();
+
+        // handle shoot
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+            this.shootBeam();
+        }
+
+        // update beams
+        for(var i = 0; i < this.projectiles.getChildren().length; i++){
+            var beam = this.projectiles.getChildren()[i];
+            beam.update();
+        }
+    }
+
+    shootBeam() {
+        var beam = new Beam(this);
     }
 
     startScaleBounce(object) {
