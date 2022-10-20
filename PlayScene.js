@@ -23,53 +23,47 @@ class PlayScene extends Phaser.Scene {
         this.background.setOrigin(0, 0);
 
         this.ship = this.add.sprite(config.width/2, config.height/2, "spaceship");
-
         this.startScaleBounce(this.ship);
         this.startAngleBounce(this.ship);
-
         this.anims.create({
             key: "spaceship_anim",
             frames: this.anims.generateFrameNumbers("spaceship"),
             frameRate: 25,
             repeat: -1
         });
-
         this.ship.play("spaceship_anim");
+
 
         this.anims.create({
             key: "explosion_anim",
             frames: this.anims.generateFrameNumbers("explosion"),
-            frameRate: 20,
+            frameRate: 15,
             repeat: 0,
             hideOnComplete: true
         })
 
-        this.asteroid1 = this.add.image(
-            Phaser.Math.Between(0, config.width),
-            -50,
-            "asteroid"
-        );
-        this.asteroid1.setOrigin(0, 0);
-        this.asteroid1.setScale(Phaser.Math.Between(1, 1.5))
+        this.asteroids = [];
+        for (var i = 0; i < 6; i++) {
+            this.asteroids[i] = this.add.sprite(
+                Phaser.Math.Between(0, config.width),
+                Phaser.Math.Between(-500, -10),
+                "asteroid"
+            );
+            this.asteroids[i].setInteractive();
+            this.asteroids[i].setOrigin(0, 0);
+            this.asteroids[i].setScale(Phaser.Math.Between(1, 1.5));
+            this.startAngleBounce(this.asteroids[i]);
+        }
 
-        this.startAngleBounce(this.asteroid1);
-
-        this.asteroid2 = this.add.image(
-            Phaser.Math.Between(0, config.width),
-            -50,
-            "asteroid"
-        );
-        this.asteroid2.setOrigin(0, 0);
-        this.asteroid2.setScale(Phaser.Math.Between(1, 1.5))
-
-        this.startAngleBounce(this.asteroid2);
+        this.input.on('gameobjectdown', this.destroyAsteroid, this);
 
         this.add.text(20, 20, "Score: 0", {fill: "red"});
     }
 
     update() {
-        this.moveAsteroid(this.asteroid1, 1);
-        this.moveAsteroid(this.asteroid2, 2);
+        for (var i in this.asteroids) {
+            this.moveAsteroid(this.asteroids[i], 1);
+        }
 
         this.background.tilePositionY -= 0.5
     }
@@ -98,6 +92,12 @@ class PlayScene extends Phaser.Scene {
 
             object.angle += angleStep;
         }, 100);
+    }
+
+    destroyAsteroid(pointer, gameObject) {
+        console.log(gameObject)
+        gameObject.setTexture("explosion");
+        gameObject.play("explosion_anim");
     }
 
     moveAsteroid(asteroid, velocity) {
