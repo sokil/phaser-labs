@@ -71,16 +71,18 @@ class PlayScene extends Phaser.Scene
         // asteroids
         this.asteroids = [];
         for (var i = 0; i < 7; i++) {
-            this.asteroids[i] = this.add.sprite(
+            var asteroid = this.add.sprite(
                 Phaser.Math.Between(100, config.width - 100),
                 Phaser.Math.Between(-600, -10),
                 "asteroid"
             );
-            this.asteroids[i].setInteractive();
-            this.asteroids[i].setOrigin(0, 0);
-            this.asteroids[i].setAngle(Phaser.Math.Between(0, 360));
-            this.asteroids[i].setScale(Phaser.Math.Between(1, 1.5));
-            this.startAngleBounce(this.asteroids[i]);
+            asteroid.setInteractive();
+            asteroid.setOrigin(0, 0);
+            asteroid.setAngle(Phaser.Math.Between(0, 360));
+            asteroid.setScale(Phaser.Math.Between(1, 1.5));
+            this.startAngleBounce(asteroid);
+
+            this.asteroids[i] = asteroid;
         }
 
         // power ups
