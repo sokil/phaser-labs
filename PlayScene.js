@@ -115,6 +115,6 @@ class PlayScene extends Phaser.Scene {
         asteroid.x = Phaser.Math.Between(0, config.width);
         asteroid.y = -50;
         asteroid.setTexture("asteroid");
-        asteroid.setVisible();
+        asteroid.setVisible(true);
     }
 }
