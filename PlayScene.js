@@ -108,7 +108,8 @@ class PlayScene extends Phaser.Scene {
     }
 
     resetAsteroid(asteroid) {
-        asteroid.x = Phaser.Math.Between(0, config.width)
-        asteroid.y = -50
+        asteroid.x = Phaser.Math.Between(0, config.width);
+        asteroid.y = -50;
+        gameObject.setTexture("asteroid");
     }
 }
