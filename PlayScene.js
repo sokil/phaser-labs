@@ -5,20 +5,44 @@ class PlayScene extends Phaser.Scene {
 
     preload() {
         this.load.image("background", "assets/bg_tile.jpg");
-        this.load.image("spaceship", "assets/spaceship.png");
         this.load.image("asteroid", "assets/asteroid.png");
+
+        this.load.spritesheet("spaceship", "assets/spritesheet/spaceship.png", {
+            frameWidth: 81,
+            frameHeight: 90,
+        })
+
+        this.load.spritesheet("explosion", "assets/spritesheet/explosion.png", {
+            frameWidth: 16,
+            frameHeight: 16,
+        });
     }
 
     create() {
         this.background = this.add.tileSprite(0, 0, config.width, config.height, "background");
         this.background.setOrigin(0, 0);
 
-        console.log(window.config)
-        this.ship = this.add.image(config.width/2, config.height/2, "spaceship");
-        this.ship.setOrigin(0, 0);
+        this.ship = this.add.sprite(config.width/2, config.height/2, "spaceship");
 
         this.startScaleBounce(this.ship);
         this.startAngleBounce(this.ship);
+
+        this.anims.create({
+            key: "spaceship_anim",
+            frames: this.anims.generateFrameNumbers("spaceship"),
+            frameRate: 25,
+            repeat: -1
+        });
+
+        this.ship.play("spaceship_anim");
+
+        this.anims.create({
+            key: "explosion_anim",
+            frames: this.anims.generateFrameNumbers("explosion"),
+            frameRate: 20,
+            repeat: 0,
+            hideOnComplete: true
+        })
 
         this.asteroid1 = this.add.image(
             Phaser.Math.Between(0, config.width),
@@ -26,6 +50,7 @@ class PlayScene extends Phaser.Scene {
             "asteroid"
         );
         this.asteroid1.setOrigin(0, 0);
+        this.asteroid1.setScale(Phaser.Math.Between(1, 1.5))
 
         this.startAngleBounce(this.asteroid1);
 
@@ -35,6 +60,7 @@ class PlayScene extends Phaser.Scene {
             "asteroid"
         );
         this.asteroid2.setOrigin(0, 0);
+        this.asteroid2.setScale(Phaser.Math.Between(1, 1.5))
 
         this.startAngleBounce(this.asteroid2);
 
