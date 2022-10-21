@@ -50,6 +50,11 @@ class PlayScene extends Phaser.Scene
         });
         this.player.play("spaceship_anim");
         this.player.setCollideWorldBounds(true);
+        this.player.on('animationcomplete', (animation, frame, asteroid, frameKey) => {
+            if (animation.key === "explosion_anim") {
+                this.resetPlayer(asteroid);
+            }
+        });
 
         // beam
         this.anims.create({
@@ -143,7 +148,7 @@ class PlayScene extends Phaser.Scene
         this.physics.add.overlap(
             this.player,
             this.asteroids,
-            this.destroyPlayer,
+            this.destroyPlayerByAsteroid,
             null,
             this
         );
@@ -194,21 +199,6 @@ class PlayScene extends Phaser.Scene
         }
     }
 
-    pickPowerUp(player, powerUp) {
-        powerUp.disableBody(true, true);
-    }
-
-    shootBeam() {
-        var beam = new Beam(this);
-    }
-
-    destroyPlayer(player, asteroid) {
-        this.resetAsteroid(asteroid)
-        player.x = config.width/2;
-        player.y = config.height - 60;
-        player.setVelocity(0, 0)
-    }
-
     startScaleBounce(object) {
         var scaleStep = 0.01;
         setInterval(() => {
@@ -249,6 +239,11 @@ class PlayScene extends Phaser.Scene
         asteroid.play("explosion_anim");
     }
 
+    animateDestroyPlayer(player) {
+        player.setTexture("explosion");
+        player.play("explosion_anim");
+    }
+
     moveAsteroid(asteroid, velocity) {
         asteroid.y += velocity;
         if (asteroid.y > config.height) {
@@ -275,5 +270,26 @@ class PlayScene extends Phaser.Scene
         } else if (this.cursorKeys.down.isDown) {
             this.player.setVelocityY(200);
         }
+    }
+
+    pickPowerUp(player, powerUp) {
+        powerUp.disableBody(true, true);
+    }
+
+    shootBeam() {
+        var beam = new Beam(this);
+    }
+
+    destroyPlayerByAsteroid(player, asteroid) {
+        this.animateDestroyAsteroid(asteroid)
+        this.animateDestroyPlayer(player)
+    }
+
+    resetPlayer (player) {
+        player.x = config.width/2;
+        player.y = config.height - 60;
+        player.setVelocity(0, 0)
+        player.setTexture("spaceship")
+        player.setVisible(true);
     }
 }
