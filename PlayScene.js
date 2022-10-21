@@ -172,7 +172,8 @@ class PlayScene extends Phaser.Scene
         this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
         // score
-        this.add.text(20, 20, "Score: 0", {fill: "red"});
+        this.add.text(20, 20, "Score: ", {fill: "red"});
+        this.score = this.add.text(80, 20, "0", {fill: "red"});
     }
 
     update() {
@@ -232,6 +233,7 @@ class PlayScene extends Phaser.Scene
     destroyAsteroidByProjectile(projectile, asteroid) {
         projectile.destroy()
         this.animateDestroyAsteroid(asteroid)
+        this.score.setText(parseInt(this.score.text) + 1)
     }
 
     animateDestroyAsteroid(asteroid) {
