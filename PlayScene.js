@@ -31,12 +31,26 @@ class PlayScene extends Phaser.Scene
             frameWidth: 16,
             frameHeight: 16
         });
+
+        this.load.audio("beam", ["assets/sound/beam.ogg"]);
+        this.load.audio("explosion", ["assets/sound/explosion.ogg"]);
+        this.load.audio("pickup", ["assets/sound/pickup.ogg"]);
+        this.load.audio("bg_sound", ["assets/sound/bg.ogg"]);
     }
 
     create() {
         // background
         this.background = this.add.tileSprite(0, 0, config.width, config.height, "background");
         this.background.setOrigin(0, 0);
+
+        // sounds
+        this.beamSound = this.sound.add("beam");
+        this.explosionSound = this.sound.add("explosion");
+        this.pickupSound = this.sound.add("pickup");
+        this.bgSound = this.sound.add("bg_sound");
+
+        // bg sound
+        this.bgSound.play();
 
         // ship
         this.player = this.physics.add.sprite(config.width/2, config.height - 60, "spaceship");
@@ -50,11 +64,6 @@ class PlayScene extends Phaser.Scene
         });
         this.player.play("spaceship_anim");
         this.player.setCollideWorldBounds(true);
-        this.player.on('animationcomplete', (animation, frame, asteroid, frameKey) => {
-            if (animation.key === "explosion_anim") {
-                this.resetPlayer(asteroid);
-            }
-        });
 
         // beam
         this.anims.create({
@@ -75,15 +84,15 @@ class PlayScene extends Phaser.Scene
 
         // asteroids
         this.asteroids = this.physics.add.group();
-        for (var i = 0; i < 7; i++) {
-            var asteroid = this.add.sprite(
+        for (var i = 0; i < 4; i++) {
+            var asteroid = this.physics.add.sprite(
                 Phaser.Math.Between(100, config.width - 100),
                 Phaser.Math.Between(-600, -10),
                 "asteroid"
             );
             asteroid.setInteractive();
             asteroid.setOrigin(0, 0);
-            asteroid.setAngle(Phaser.Math.Between(0, 360));
+            asteroid.setAngle(Phaser.Math.Between(0, 40));
             asteroid.setScale(Phaser.Math.Between(1, 1.5));
             this.startAngleBounce(asteroid);
 
@@ -190,7 +199,9 @@ class PlayScene extends Phaser.Scene
 
         // handle shoot
         if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-            this.shootBeam();
+            if (this.player.active) {
+                this.shootBeam();
+            }
         }
 
         // update beams
@@ -227,23 +238,27 @@ class PlayScene extends Phaser.Scene
     }
 
     destroyAsteroidByMouseClick(pointer, asteroid) {
-        this.animateDestroyAsteroid(asteroid)
+        this.destroyAsteroid(asteroid);
+        this.explosionSound.play();
     }
 
     destroyAsteroidByProjectile(projectile, asteroid) {
         projectile.destroy()
-        this.animateDestroyAsteroid(asteroid)
-        this.score.setText(parseInt(this.score.text) + 1)
+        this.destroyAsteroid(asteroid)
+        this.score.setText(parseInt(this.score.text) + 1);
+        this.explosionSound.play();
     }
 
-    animateDestroyAsteroid(asteroid) {
-        asteroid.setTexture("explosion");
-        asteroid.play("explosion_anim");
-    }
+    destroyAsteroid(asteroid) {
+        asteroid.disableBody(true, true);
+        var explosion = new Explosion(this, asteroid.x, asteroid.y);
 
-    animateDestroyPlayer(player) {
-        player.setTexture("explosion");
-        player.play("explosion_anim");
+        this.time.addEvent({
+            delay: 1000,
+            callback: () => this.resetAsteroid(asteroid),
+            callbackScope: this,
+            loop: false
+        })
     }
 
     moveAsteroid(asteroid, velocity) {
@@ -254,10 +269,9 @@ class PlayScene extends Phaser.Scene
     }
 
     resetAsteroid(asteroid) {
-        asteroid.x = Phaser.Math.Between(0, config.width);
-        asteroid.y = -50;
-        asteroid.setTexture("asteroid");
-        asteroid.setVisible(true);
+        var x = Phaser.Math.Between(0, config.width);
+        var y = -50;
+        asteroid.enableBody(true, x, y, true, true);
     }
 
     movePlayer() {
@@ -276,22 +290,57 @@ class PlayScene extends Phaser.Scene
 
     pickPowerUp(player, powerUp) {
         powerUp.disableBody(true, true);
+        this.pickupSound.play();
     }
 
     shootBeam() {
         var beam = new Beam(this);
+        this.beamSound.play();
     }
 
-    destroyPlayerByAsteroid(player, asteroid) {
-        this.animateDestroyAsteroid(asteroid)
-        this.animateDestroyPlayer(player)
+    destroyPlayer(player) {
+        if (this.player.alpha < 1) {
+            return;
+        }
+
+        player.active = false;
+        player.setVelocity(0, 0);
+        player.disableBody(true, true);
+
+        var explosion = new Explosion(this, player.x, player.y);
+
+        this.time.addEvent({
+            delay: 1000,
+            callback: () => this.resetPlayer(player),
+            callbackScope: this,
+            loop: false
+        });
     }
 
     resetPlayer (player) {
-        player.x = config.width/2;
-        player.y = config.height - 60;
-        player.setVelocity(0, 0)
-        player.setTexture("spaceship")
-        player.setVisible(true);
+        player.active = true;
+        var x = config.width/2;
+        var y = config.height - 100;
+        player.enableBody(true, x, y, true, true);
+        player.setVelocity(0, 0);
+        player.alpha = 0.5;
+
+        var tween = this.tweens.add({
+            targets: player,
+            y: config.height - 100,
+            ease: 'Power1',
+            duration: 1500,
+            repeat: 0,
+            onComplete: function() {
+                player.alpha = 1;
+            },
+            callbackScope: this
+        });
+    }
+
+    destroyPlayerByAsteroid(player, asteroid) {
+        this.destroyAsteroid(asteroid);
+        this.destroyPlayer(player);
+        this.explosionSound.play();
     }
 }
